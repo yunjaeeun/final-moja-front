@@ -10,7 +10,7 @@ export const useAccountStore = defineStore('counter', () => {
   const token = ref('')
   const userId = ref(0)
   const isAdmin = ref(false)
-  const BASE_URL = 'http://127.0.0.1:8000/accounts'
+  const BASE_URL = 'http://3.37.135.52/accounts'
   const isSuccess = ref(false)
 
   const getUserId = function(token) {

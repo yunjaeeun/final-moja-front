@@ -42,7 +42,7 @@ const exchangeRates = ref([]);
 
 onMounted(() => {
   axios({
-    url: `http://127.0.0.1:8000/finances/exchange/`,
+    url: `http://3.37.135.52/finances/exchange/`,
     method: 'get'
   })
     .then((res) => {

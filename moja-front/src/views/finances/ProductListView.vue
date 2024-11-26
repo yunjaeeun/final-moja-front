@@ -321,7 +321,7 @@ const applyFilters = () => {
 
 // 데이터 가져오기
 onMounted(() => {
-  axios.get('http://127.0.0.1:8000/finances/product/')
+  axios.get('http://3.37.135.52/finances/product/')
     .then((res) => {
       productList.value = res.data;
       filteredList.value = res.data; // 초기값

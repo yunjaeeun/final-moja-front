@@ -16,7 +16,7 @@ export const useCardStore = defineStore('map', () => {
     router.push('/card/recommend/result'); // 결과 페이지로 이동
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/cards/recommend/", data);
+      const response = await axios.post("http://3.37.135.52/cards/recommend/", data);
       recommendedCard.value = response.data.recommendations.recommended_cards;
       console.log("추천 결과:", recommendedCard.value);
     } catch (error) {
@@ -28,7 +28,7 @@ export const useCardStore = defineStore('map', () => {
 
   const bestCards = function () {
     axios({
-      url: 'http://127.0.0.1:8000/cards/best/',
+      url: 'http://3.37.135.52/cards/best/',
       method: 'get'
     })
     .then((res) => {

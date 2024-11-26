@@ -145,7 +145,7 @@ const cancelPostEdit = () => {
 const savePostEdit = async () => {
   try {
     const response = await axios.put(
-      `http://127.0.0.1:8000/boards/help/${route.params.id}/`,
+      `http://3.37.135.52/boards/help/${route.params.id}/`,
       {
         help_title: editedTitle.value,
         help_content: editedContent.value
@@ -183,7 +183,7 @@ const saveCommentEdit = async (commentId) => {
     const currentComment = comments.value.find(c => c.id === commentId);
     
     const response = await axios.put(
-      `http://127.0.0.1:8000/boards/help/comments/${commentId}/`,
+      `http://3.37.135.52/boards/help/comments/${commentId}/`,
       {
         help_comment_content: editedCommentContent.value,
         help_article: help.value.id,  // 게시글 ID 추가
@@ -230,7 +230,7 @@ onMounted(async () => {
 
   try {
     const response = await axios.get(
-      `http://127.0.0.1:8000/boards/help/${route.params.id}/`,
+      `http://3.37.135.52/boards/help/${route.params.id}/`,
       {
         headers: {
           Authorization: `Token ${accountStore.token}`,
@@ -258,7 +258,7 @@ const deletePost = async () => {
   
   try {
     await axios.delete(
-      `http://127.0.0.1:8000/boards/help/${route.params.id}/`,
+      `http://3.37.135.52/boards/help/${route.params.id}/`,
       {
         headers: {
           Authorization: `Token ${accountStore.token}`,
@@ -276,7 +276,7 @@ const deletePost = async () => {
 const loadComments = async () => {
   try {
     const response = await axios.get(
-      `http://127.0.0.1:8000/boards/help/${route.params.id}/comments/`,
+      `http://3.37.135.52/boards/help/${route.params.id}/comments/`,
       {
         headers: {
           Authorization: `Token ${useAccountStore().token}`,
@@ -294,7 +294,7 @@ const submitComment = async () => {
   if (!newComment.value.trim()) return;
   try {
     const response = await axios.post(
-      `http://127.0.0.1:8000/boards/help/${route.params.id}/comments/`,
+      `http://3.37.135.52/boards/help/${route.params.id}/comments/`,
       { help_comment_content: newComment.value },
       { headers: { Authorization: `Token ${useAccountStore().token}` } }
     );
@@ -318,7 +318,7 @@ const deleteComment = async (commentId) => {
   
   try {
     await axios.delete(
-      `http://127.0.0.1:8000/boards/help/comments/${commentId}/`,
+      `http://3.37.135.52/boards/help/comments/${commentId}/`,
       {
         headers: {
           Authorization: `Token ${accountStore.token}`,
@@ -336,7 +336,7 @@ const deleteComment = async (commentId) => {
 const toggleLike = async () => {
   try {
     const response = await axios.post(
-      `http://127.0.0.1:8000/boards/help/${route.params.id}/like/`,
+      `http://3.37.135.52/boards/help/${route.params.id}/like/`,
       {},
       {
         headers: {

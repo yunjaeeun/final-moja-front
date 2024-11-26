@@ -805,7 +805,7 @@ const formatMaxLimit = (maxLimit) => {
 const fetchUserProducts = async () => {
   try {
     const response = await axios.get(
-      "http://127.0.0.1:8000/finances/user-product/",
+      "http://3.37.135.52/finances/user-product/",
       {
         params: { user_id: accountStore.userId },
       }
@@ -820,7 +820,7 @@ const fetchUserProducts = async () => {
 
 const deleteUserProduct = async (productId) => {
   try {
-    await axios.delete("http://127.0.0.1:8000/finances/user-product/", {
+    await axios.delete("http://3.37.135.52/finances/user-product/", {
       data: { product_id: productId },
     });
     // 상품 목록 갱신

@@ -153,7 +153,7 @@ const getCardImage = (cardName) => {
 
 const saveUserProduct = async (cardId) => {
   try {
-    await axios.post("http://127.0.0.1:8000/cards/user-card/", {
+    await axios.post("http://3.37.135.52/cards/user-card/", {
       user_id: accountStore.userId,
       card_id: cardId,
     });
@@ -189,7 +189,7 @@ const saveUserProduct = async (cardId) => {
 // 내 카드 삭제
 const deleteUserProduct = async (cardId) => {
   try {
-    await axios.delete("http://127.0.0.1:8000/cards/user-card/", {
+    await axios.delete("http://3.37.135.52/cards/user-card/", {
       data: { card_id: cardId, user_id: accountStore.userId },
     });
     myProduct.value = myProduct.value.filter((item) => item.card.id !== cardId);
@@ -222,11 +222,11 @@ const deleteUserProduct = async (cardId) => {
 // 데이터 로드
 onMounted(async () => {
   try {
-    const productRes = await axios.get(`http://127.0.0.1:8000/cards/${cardId}/`);
+    const productRes = await axios.get(`http://3.37.135.52/cards/${cardId}/`);
     product.value = productRes.data;
 
     if (accountStore.userId) {
-      const userProductRes = await axios.get("http://127.0.0.1:8000/cards/user-card/", {
+      const userProductRes = await axios.get("http://3.37.135.52/cards/user-card/", {
         params: { user_id: accountStore.userId },
       });
       myProduct.value = userProductRes.data;

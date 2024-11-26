@@ -5,7 +5,7 @@ import axios from "axios";
 
 export const useFinanceStore = defineStore("finance", () => {
   // API URL
-  const FINANCE_URL = "http://127.0.0.1:8000/finances";
+  const FINANCE_URL = "http://3.37.135.52/finances";
 
   // 추천 상품 리스트 상태
   const recommendProductLists = ref([]);

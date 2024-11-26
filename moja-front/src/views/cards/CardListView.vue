@@ -307,7 +307,7 @@ const applyFilters = () => {
 
 // 데이터 가져오기
 onMounted(() => {
-    axios.get('http://127.0.0.1:8000/cards/').then((res) => {
+    axios.get('http://3.37.135.52/cards/').then((res) => {
         cardList.value = res.data;
         filteredList.value = res.data;
     });

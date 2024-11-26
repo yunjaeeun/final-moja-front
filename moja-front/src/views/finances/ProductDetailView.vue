@@ -110,7 +110,7 @@ const toggleModal = () => {
 
 const saveUserProduct = async (productId) => {
   try {
-    await axios.post("http://127.0.0.1:8000/finances/user-product/", {
+    await axios.post("http://3.37.135.52/finances/user-product/", {
       user_id: accountStore.userId,
       product_id: productId,
     });
@@ -142,7 +142,7 @@ const saveUserProduct = async (productId) => {
 
 const deleteUserProduct = async (productId) => {
   try {
-    await axios.delete("http://127.0.0.1:8000/finances/user-product/", {
+    await axios.delete("http://3.37.135.52/finances/user-product/", {
       data: { product_id: productId, user_id: accountStore.userId },
     });
     // 상품 목록 갱신
@@ -174,7 +174,7 @@ const deleteUserProduct = async (productId) => {
 onMounted(async () => {
   try {
     // 상품 상세 정보 로드
-    const productRes = await axios.get(`http://127.0.0.1:8000/finances/product/detail/${productId}`);
+    const productRes = await axios.get(`http://3.37.135.52/finances/product/detail/${productId}`);
     product.value = productRes.data;
 
     if (product.value.product_options?.length > 0) {
@@ -185,7 +185,7 @@ onMounted(async () => {
 
     // 유저가 등록한 상품 리스트 로드
     if (accountStore.userId) {
-      const userProductRes = await axios.get("http://127.0.0.1:8000/finances/user-product/", {
+      const userProductRes = await axios.get("http://3.37.135.52/finances/user-product/", {
         params: { user_id: accountStore.userId },
       });
       myProduct.value = userProductRes.data;

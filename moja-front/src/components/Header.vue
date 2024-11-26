@@ -115,7 +115,7 @@ const moveToSignIn = function () {
 
 const logout = function () {
   axios({
-    url: `http://127.0.0.1:8000/accounts/dj-rest-auth/logout/`,
+    url: `http://3.37.135.52/accounts/dj-rest-auth/logout/`,
     method: 'post'
   })
 

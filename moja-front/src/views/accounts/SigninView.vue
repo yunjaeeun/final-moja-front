@@ -324,7 +324,7 @@ const signin = () => {
   };
 
   axios
-    .post("http://127.0.0.1:8000/accounts/dj-rest-auth/registration", signinData)
+    .post("http://3.37.135.52/accounts/dj-rest-auth/registration", signinData)
     .then((res) => {
       Swal.fire({
         title: '회원가입 성공',

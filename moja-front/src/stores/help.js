@@ -10,7 +10,7 @@ export const useHelpStore = defineStore(
     const helps = ref([]);
     const hotHelps = ref([]); // 이 부분이 빠져있었습니다
 
-    const API_URL = "http://127.0.0.1:8000/boards";
+    const API_URL = "http://3.37.135.52/boards";
     const HELP_URL = `${API_URL}/help`;
     
     // 질문 게시글 리스트 가져오기

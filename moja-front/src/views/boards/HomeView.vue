@@ -179,7 +179,7 @@ const duplicatedCards = ref([]);
 
 const fetchCards = async () => {
   try {
-    const response = await axios.get("http://127.0.0.1:8000/cards/best/");
+    const response = await axios.get("http://3.37.135.52/cards/best/");
     checkCards.value = response.data.check_cards;
     creditCards.value = response.data.credit_cards;
 
