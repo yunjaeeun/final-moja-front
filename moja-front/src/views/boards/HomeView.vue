@@ -1,5 +1,5 @@
 <template>
-  <div class="home-container">
+  <div class="home-container mb-5">
     <!-- Main Banner -->
     <section class="banner-section">
       <div class="banner-content">
@@ -78,19 +78,7 @@
 
         <!-- 오른쪽 섹션 -->
         <div class="right-section">
-          <!-- 챌린지 섹션 -->
-          <div class="challenge-section">
-            <h2 class="section-title">🏆 진행 중인 챌린지</h2>
-            <div class="challenge-card">
-              <span class="challenge-badge">💰 30만원으로 한 달 살기!</span>
-              <span class="challenge-progress">🧢💰 30</span>
-              <span class="challenge-total"> 👨‍👦‍👦18/20</span>
-              <p class="challenge-description">
-                매일 소비내역 인증하고 알뜰살뜰한 연말을 보내고 싶으신 분들?
-                모이세요 !!!
-              </p>
-            </div>
-          </div>
+          <News :newsData="articles" />
         </div>
       </div>
     </div>
@@ -106,17 +94,35 @@ import MapTest from "@/components/MapTest.vue";
 import { useAccountStore } from "@/stores/account";
 import Swal from "sweetalert2";
 import axios from "axios";
+import News from "@/components/News.vue";
 
 const isModalOpen = ref(false);
 const isExchange = ref(false);
 const isMap = ref(false);
 const accountStore = useAccountStore();
 
-const loading = ref(true);
-
 // 카드 데이터
 const checkCards = ref([]);
 const creditCards = ref([]);
+
+const articles = ref([]);
+const loading = ref(true);
+const error = ref(null);
+
+// API 호출 함수
+const fetchArticles = async () => {
+  try {
+    const response = await axios.get("http://3.37.135.52/articles/get/");
+    articles.value = response.data; // 받아온 데이터를 저장
+  } catch (err) {
+    error.value = "데이터를 가져오는 중 오류가 발생했습니다.";
+    console.error(err);
+  } finally {
+    loading.value = false; // 로딩 종료
+  }
+};
+
+
 
 const moveToCardDetail = function (cardId) {
   if (accountStore.token === '') {
@@ -276,6 +282,7 @@ const goToDetail = (id) => {
 };
 
 onMounted(async () => {
+  fetchArticles();
   await store.getHotHelps();
   await fetchCards();
   updateCards();

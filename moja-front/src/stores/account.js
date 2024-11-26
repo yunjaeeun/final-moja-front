@@ -12,6 +12,7 @@ export const useAccountStore = defineStore('counter', () => {
   const isAdmin = ref(false)
   const BASE_URL = 'http://3.37.135.52/accounts'
   const isSuccess = ref(false)
+  const birthDate = ref('')
 
   const getUserId = function(token) {
     axios({
@@ -36,7 +37,9 @@ export const useAccountStore = defineStore('counter', () => {
     .then(res => {
       console.log(isAdmin.value);
       isAdmin.value = res.data.is_superuser
+      birthDate.value = res.data.birth_date
       console.log(isAdmin.value);
+      console.log(birthDate.value);
     })
   }
 
@@ -99,5 +102,5 @@ export const useAccountStore = defineStore('counter', () => {
     // 예시: this.$router.push('/login');
   };
 
-  return {login, BASE_URL, token, logout, isSuccess, userId, isAdmin}
+  return {login, BASE_URL, token, logout, isSuccess, userId, isAdmin, birthDate}
 }, { persist: true })

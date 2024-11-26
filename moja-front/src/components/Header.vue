@@ -26,17 +26,12 @@
             <!-- 커뮤니티 -->
             <li class="nav-item">
               <router-link to="/help" class="nav-link d-flex align-items-center">
-                <img src="/src/assets/images/boards/community.png" alt="커뮤니티" class="icon" />
+                <!-- <img src="/src/assets/images/boards/community.png" alt="커뮤니티" class="icon" /> -->
+                <span class="ms-2">커뮤니티</span>
                 <span class="d-lg-none ms-2">커뮤니티</span>
               </router-link>
             </li>
             <!-- 프로필 -->
-            <li class="nav-item">
-              <router-link to="/profile" class="nav-link d-flex align-items-center">
-                <img src="/src/assets/images/boards/profile.png" alt="프로필" class="icon" />
-                <span class="d-lg-none ms-2">프로필</span>
-              </router-link>
-            </li>
             <!-- 랭킹: 넣을지 안 넣을지 고민 중 -->
             <!-- <li class="nav-item">
               <router-link to="/ranking" class="nav-link d-flex align-items-center">
@@ -44,20 +39,6 @@
                 <span class="d-lg-none ms-2">랭킹</span>
               </router-link>
             </li> -->
-            <li class="nav-item" v-if="accountStore.token === ''">
-              <a class="nav-link d-flex align-items-center">
-                <!-- <img src="" alt="로그인" class="icon d-lg-none" /> -->
-                
-                <span @click="toggleModal">로그인</span>
-              </a>
-            </li>
-            
-              <li class="nav-item" v-if="accountStore.token !== ''" @click="logout">
-                <a class="nav-link d-flex align-items-center">
-                <!-- <img src="" alt="로그인" class="icon d-lg-none" /> -->
-                <span>로그아웃</span>
-              </a>
-              </li>
             
             <li class="nav-item">
               <RouterLink to="/product" class="nav-link d-flex align-items-center">
@@ -68,6 +49,26 @@
               <RouterLink to="/card" class="nav-link d-flex align-items-center">
                 <span>카드</span>
               </RouterLink>
+            </li>
+            <li class="nav-item" v-if="accountStore.token === ''">
+              <a class="nav-link d-flex align-items-center">
+                <!-- <img src="" alt="로그인" class="icon d-lg-none" /> -->
+                
+                <span @click="toggleModal">로그인</span>
+              </a>
+            </li>
+            
+            <li class="nav-item" v-if="accountStore.token !== ''" @click="logout">
+              <a class="nav-link d-flex align-items-center">
+                <!-- <img src="" alt="로그인" class="icon d-lg-none" /> -->
+                <span>로그아웃</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <router-link to="/profile" class="nav-link d-flex align-items-center">
+                <img src="/src/assets/images/boards/profile.png" alt="프로필" class="icon" />
+                <span class="d-lg-none ms-2">프로필</span>
+              </router-link>
             </li>
           </ul>
         </div>
@@ -137,6 +138,8 @@ const logout = function () {
 </script>
 
 <style scoped>
+
+
 .icon {
   width: 20px;
   height: 20px;

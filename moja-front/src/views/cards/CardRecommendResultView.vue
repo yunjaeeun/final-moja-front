@@ -7,17 +7,9 @@
     <h2 class="title">AI 카드 추천 결과</h2>
     <div class="card-slider-wrapper">
       <div class="card-slider" ref="sliderRef" @mouseenter="stopSliding" @mouseleave="startSliding">
-        <div
-          v-for="card in duplicatedCards"
-          :key="card.id"
-          class="card-item"
-        >
+        <div v-for="card in duplicatedCards" :key="card.id" class="card-item">
           <div class="credit-card" @click="moveToDetail(card.id)">
-            <img
-              :src="getCardImage(card.card_name)"
-              :alt="card.card_name"
-              class="card-image"
-            />
+            <img :src="getCardImage(card.card_name)" :alt="card.card_name" class="card-image" />
             <div class="card-info">
               <h5 class="card-title">{{ card.card_name }}</h5>
               <p class="card-company">{{ card.company.name }}</p>
@@ -41,7 +33,7 @@ import { useRouter } from "vue-router";
 
 export default {
   name: 'CardRecommendation',
-  
+
   data() {
     return {
       recommendedCards: [],
@@ -51,7 +43,7 @@ export default {
       scrollInterval: 20,
     }
   },
-  
+
   computed: {
     // Store의 loading 상태 가져오기
     loading() {
@@ -61,18 +53,33 @@ export default {
       return [...this.recommendedCards, ...this.recommendedCards, ...this.recommendedCards];
     }
   },
-  
+
   methods: {
     moveToDetail(cardId) {
-    this.$router.push({ name: 'cardDetail', params: { id: cardId } });
-  },
-    getCardImage(cardName) {
-      return `/src/assets/images/cards/${cardName}.png`;
+      this.$router.push({ name: 'cardDetail', params: { id: cardId } });
     },
+
+    getCardImage(cardName) {
+      const images = import.meta.glob('/src/assets/images/cards/*.{png,jpg,gif}');
+      // 특수문자 제거 및 공백을 "_"로 변환
+      const formattedName = cardName.replace(/:/g, '');
+
+      // 파일 경로 확인
+      for (const ext of ['png', 'jpg', 'gif']) {
+        const path = `/src/assets/images/cards/${formattedName}.${ext}`;
+        if (images[path]) {
+          return path; // 파일 경로 반환
+        }
+      }
+
+      // 기본 이미지 반환
+      return '/src/assets/images/cards/default.png';
+    },
+
 
     startSliding() {
       if (this.slideTimer) return;
-      
+
       this.slideTimer = setInterval(() => {
         const slider = this.$refs.sliderRef;
         if (!slider) return;
@@ -337,6 +344,7 @@ export default {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }

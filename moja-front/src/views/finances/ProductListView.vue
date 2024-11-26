@@ -242,7 +242,7 @@ const moveToDetail = (productId) => {
       confirmButtonText: '확인',
       timer: 1500,
       customClass: {
-        confirmButton: 'custom-warrning-button', // 버튼에 커스텀 클래스 추가
+        confirmButton: 'custom-warning-button', // 버튼에 커스텀 클래스 추가
       },
     });
   } else {

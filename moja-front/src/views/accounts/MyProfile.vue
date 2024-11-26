@@ -36,9 +36,14 @@
 
       <div class="profile-header">
         <h1>회원 정보</h1>
-        <button v-if="!isEditing" @click="toggleEdit" class="edit-button">
-          정보 수정
-        </button>
+        <div>
+          <button v-if="!isEditing" @click="deleteUser" class="delete-button me-3">
+            회원 탈퇴
+          </button>
+          <button v-if="!isEditing" @click="toggleEdit" class="edit-button">
+            정보 수정
+          </button>
+        </div>
       </div>
 
       <!-- 정보 표시 모드 -->
@@ -86,6 +91,10 @@
             <div class="form-item">
               <label>이메일</label>
               <input v-model="editForm.email" type="email" required />
+            </div>
+            <div class="form-item">
+              <label>닉네임</label>
+              <input v-model="editForm.nickname" type="nickname" required />
             </div>
             <div class="form-item">
               <label>생년월일</label>
@@ -319,6 +328,7 @@
                   v-for="value in [8, 6, 4, 2, 0]"
                   :key="value"
                 >
+
                   <div class="rate-label-text">{{ value }}%</div>
                   <div class="rate-grid-line"></div>
                 </div>
@@ -404,6 +414,7 @@ import { useAccountStore } from "@/stores/account";
 import axios from "axios";
 import { useRouter, useRoute } from "vue-router";
 import ProductDetailView from "@/views/finances/ProductDetailView.vue";
+import Swal from 'sweetalert2';
 
 const accountStore = useAccountStore();
 const isEditing = ref(false);
@@ -418,6 +429,28 @@ const isFromRateChart = ref(false);
 const previousRoute = ref(null);
 
 const showNewChart = ref(false);
+
+const deleteUser = function () {
+  axios({
+    url: `${accountStore.BASE_URL}/detail/${accountStore.userId}/`,
+    method: 'DELETE'
+  })
+  .then((res) => {
+    accountStore.token = ''
+    accountStore.userId = ''
+    Swal.fire({
+        title: '탈퇴 성공',
+        text: '😪 아쉽지만 안녕히 가세요... 😪',
+        icon: 'success', // success, error, warning, info
+        confirmButtonText: '확인',
+        customClass: {
+          confirmButton: 'custom-success-button', // 버튼에 커스텀 클래스 추가
+        },
+      });
+
+      router.push('/')
+  })
+}
 
 const toggleChartView = () => {
   showNewChart.value = !showNewChart.value;
@@ -589,12 +622,7 @@ const banks = ref([
     id: 18,
     bank_nick: "토스",
     bank_name: "토스뱅크 주식회사",
-  },
-  {
-    id: 0,
-    bank_nick: "없음",
-    bank_name: "없음",
-  },
+  }
 ]);
 
 const editForm = ref({
@@ -673,26 +701,7 @@ const formatCurrency = (amount) => {
   return new Intl.NumberFormat("ko-KR").format(num);
 };
 
-// 폼 제출 처리 - 수정 가능한 필드만 전송
-// const handleSubmit = async () => {
-//   try {
-//     const response = await axios({
-//       method: "put",
-//       url: `${accountStore.BASE_URL}/detail/${accountStore.userId}/`,
-//       headers: {
-//         Authorization: `Token ${accountStore.token}`,
-//       },
-//       data: editForm.value,
-//     });
 
-//     await fetchUserInfo();
-//     isEditing.value = false;
-//     alert("회원 정보가 수정되었습니다.")
-//   } catch (error) {
-//     console.error("회원 정보 수정 실패:", error)
-//     alert("회원 정보 수정에 실패했습니다.")
-//   }
-// };
 const handleSubmit = async () => {
   try {
     const formData = new FormData();
@@ -733,11 +742,29 @@ const handleSubmit = async () => {
     isEditing.value = false;
     imageFile.value = null;
     previewImage.value = null;
-    alert("회원 정보가 수정되었습니다.");
+    Swal.fire({
+      title: '회원 정보 수정',
+      text: '회원 정보가 수정되었습니다',
+      icon: 'success',
+      timer: 1500,
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-success-button'
+      }
+    });
   } catch (error) {
     console.error("회원 정보 수정 실패:", error);
     console.error("에러 상세:", error.response?.data);
-    alert("회원 정보 수정에 실패했습니다.");
+    Swal.fire({
+      title: '회원 정보 수정 실패',
+      text: '회원 정보 수정에 실패했습니다.',
+      icon: 'error',
+      timer: 1500,
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-warning-button'
+      }
+    });
   }
 };
 
@@ -752,14 +779,32 @@ const handleImageChange = (event) => {
   if (file) {
     // 파일 크기 체크 (예: 5MB 제한)
     if (file.size > 5 * 1024 * 1024) {
-      alert("파일 크기는 5MB를 초과할 수 없습니다.");
+      Swal.fire({
+      title: '파일 크기 확인',
+      text: '파일 크기는 5MB를 초과할 수 없습니다.',
+      icon: 'error',
+      timer: 1500,
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-warning-button'
+      }
+    });
       event.target.value = ""; // 파일 선택 초기화
       return;
     }
 
     // 이미지 파일 타입 체크
     if (!file.type.startsWith("image/")) {
-      alert("이미지 파일만 업로드 가능합니다.");
+      Swal.fire({
+      title: '파일 확인',
+      text: '이미지 파일만 업로드 가능합니다.',
+      icon: 'error',
+      timer: 1500,
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-warning-button'
+      }
+    });
       event.target.value = "";
       return;
     }
@@ -821,14 +866,32 @@ const fetchUserProducts = async () => {
 const deleteUserProduct = async (productId) => {
   try {
     await axios.delete("http://3.37.135.52/finances/user-product/", {
-      data: { product_id: productId },
+      data: { product_id: productId, user_id: accountStore.userId },
     });
     // 상품 목록 갱신
     await fetchUserProducts();
-    alert("상품이 삭제되었습니다.");
+    Swal.fire({
+      title: '삭제 성공',
+      text: '상품 삭제를 성공했습니다.',
+      icon: 'success',
+      timer: 1500,
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-success-button'
+      }
+    });
   } catch (error) {
     console.error("상품 삭제 실패:", error);
-    alert("상품 삭제에 실패했습니다.");
+    Swal.fire({
+      title: '삭제 실패',
+      text: '상품 삭제에 실패했습니다',
+      icon: 'error',
+      timer: 1500,
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-warning-button'
+      }
+    });
   }
 };
 
@@ -897,6 +960,19 @@ onMounted(async () => {
   margin-bottom: 2rem;
 }
 
+.delete-button {
+  background-color: #e34040;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background-color: #c73232; /* hover 시 더 어두운 빨간색 */
+}
+
 .edit-button {
   background-color: #40a2e3;
   color: white;
@@ -904,6 +980,10 @@ onMounted(async () => {
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.edit-button:hover {
+  background-color: #358ac5; /* hover 시 더 어두운 파란색 */
 }
 
 .info-grid,
@@ -940,13 +1020,6 @@ onMounted(async () => {
   border: 1px solid #d9d9d9;
   border-radius: 4px;
   font-size: 1rem;
-}
-
-.button-group {
-  display: flex;
-  gap: 1rem;
-  margin-top: 2rem;
-  justify-content: flex-end;
 }
 
 .save-button,
@@ -1152,6 +1225,8 @@ onMounted(async () => {
   padding: 1rem;
   border: 1px solid #eee;
   border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .rate-header {
@@ -1226,10 +1301,6 @@ onMounted(async () => {
   color: #93c6e7;
 }
 
-.rate-item {
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
 
 .rate-item:hover {
   transform: translateY(-5px);
@@ -1338,6 +1409,7 @@ onMounted(async () => {
   margin-left: 60px;
   height: calc(100% - 40px); /* 상단 여백을 제외한 높이 */
   align-items: flex-end; /* 하단 정렬 */
+  z-index: 3;
 }
 
 .rate-bar-wrapper-new {
@@ -1347,9 +1419,11 @@ onMounted(async () => {
 }
 
 .rates-container-new {
+  position: relative;
   margin-left: 30px;
   margin-right: 30px;
   margin-top: 1rem;
+  overflow: hidden;
 }
 
 .bar-container-new {
@@ -1357,6 +1431,8 @@ onMounted(async () => {
   position: relative;
   display: flex;
   padding: 20px 0;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 .rate-axis-new {
@@ -1365,17 +1441,12 @@ onMounted(async () => {
   justify-content: space-between;
   height: 100%;
   margin-right: 20px;
-  position: relative;
-  padding-bottom: 20px; /* 하단 여백 추가 */
-}
-
-.rate-label-new {
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 40px;
-  font-size: 0.8rem;
-  color: #666;
+  position: sticky;
+  left: 0;
+  padding-bottom: 20px;
+  min-width: 50px; /* Y축의 최소 너비 설정 */
+  z-index: 2;
+  background-color: white;
 }
 
 .rate-bar-new {
@@ -1418,8 +1489,6 @@ onMounted(async () => {
   white-space: nowrap;
 }
 
-/* ... 기존 스타일 ... */
-
 .rate-label-new {
   position: relative;
   display: flex;
@@ -1428,20 +1497,25 @@ onMounted(async () => {
   height: 40px;
   font-size: 0.8rem;
   color: #666;
+  width: 100%;
+  z-index: 10;
 }
 
 .rate-label-text {
   position: absolute;
   right: 10px;
-  z-index: 2;
+  z-index: 10;
 }
 
 .rate-grid-line {
   position: absolute;
-  left: 100%; /* Y축에서 시작 */
-  right: -800px; /* 충분히 긴 길이 */
+  left: 0; 
+  width: 1500px; /* 충분히 긴 고정 너비 */
   height: 1px;
   background-color: #eee;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
 }
 
 .rate-bar-new {
@@ -1515,5 +1589,23 @@ onMounted(async () => {
 /* 초기 높이 클래스 */
 .initial-height {
   height: 0 !important;
+}
+
+.bar-container-new::-webkit-scrollbar {
+  height: 8px;
+}
+
+.bar-container-new::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.bar-container-new::-webkit-scrollbar-thumb {
+  background: #2d8bc7;
+  border-radius: 4px;
+}
+
+.bar-container-new::-webkit-scrollbar-thumb:hover {
+  background: #2d8bc7;
 }
 </style>

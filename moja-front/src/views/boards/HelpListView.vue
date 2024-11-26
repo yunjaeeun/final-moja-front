@@ -1,4 +1,3 @@
-<!-- HelpListView.vue -->
 <template>
   <div class="page-container">
 
@@ -9,7 +8,7 @@
           <button class="create-btn" @click="goToCreate">글쓰기</button>
       </div>
 
-      <!-- 카테고리 필터를 테이블 형식으로 변경 -->
+      <!-- 카테고리 필터를 테이블로 -->
       <table class="category-table">
         <tr>
           <td 

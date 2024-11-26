@@ -2,31 +2,52 @@
   <div class="help-container">
     <div class="help-detail">
       <div v-if="!editingPost">
-        <div class="help-header">
+
+        <!-- 제목 및 작성자 정보 -->
+        <div class="post-header">
           <h1>{{ help?.help_title }}</h1>
+          <div class="post-meta">
+            <div class="author-info">
+              <span class="author">작성자: {{ help?.user?.nickname }}</span>
+              <span class="date">작성일: {{ formatDate(help?.help_date) }}</span>
+            </div>
+            <button
+            @click="toggleLike"
+            class="like-btn"
+            :class="{ liked: isLiked }"
+          >
+            ❤️ {{ likeCount }}
+          </button>
+          </div>
+        <div class="top-navigation">
           <router-link to="/help">
             <button class="btn back-btn">목록으로 돌아가기</button>
           </router-link>
-        </div>
-        <div class="post-info">
-          <span>작성일: {{ formatDate(help?.help_date) }}</span>
-          <div class="like-section">
-            <button
-              @click="toggleLike"
-              class="like-btn"
-              :class="{ liked: isLiked }"
+
+
+          <div v-if="accountStore.isAdmin || isAuthor" class="author-actions">
+            <img 
+              @click="startEditPost" 
+              src="@/assets/images/boards/put.png" 
+              alt="수정" 
+              class="action-icon"
             >
-              ❤️ {{ likeCount }}
-            </button>
+            <img 
+              @click="deletePost" 
+              src="@/assets/images/boards/delete.png" 
+              alt="삭제" 
+              class="action-icon"
+            >
           </div>
         </div>
-        <p class="content">{{ help?.help_content }}</p>
+        </div>
+        <p class="content" style="white-space: pre-line">{{ help?.help_content }}</p>
 
-        <!-- 작성자만 보이는 수정/삭제 버튼 -->
+        <!-- 작성자만 보이는 수정/삭제 버튼
         <div v-if="accountStore.isAdmin || help?.is_author" class="author-actions">
           <button @click="startEditPost" class="btn edit-btn">수정</button>
           <button @click="deletePost" class="btn delete-btn">삭제</button>
-        </div>
+        </div> -->
       </div>
 
       <!-- 게시글 수정 폼 -->
@@ -51,7 +72,6 @@
 
       <!-- 댓글 섹션 -->
       <div v-if="isLoggedIn" class="comments-section">
-        <h3>댓글</h3>
         <div class="comment-form">
           <textarea
             v-model="newComment"
@@ -65,31 +85,42 @@
 
         <div class="comments-list">
           <div v-for="comment in comments" :key="comment.id" class="comment">
-            <!-- 댓글 수정 모드가 아닐 때 -->
-            <div v-if="editingCommentId !== comment.id">
+            <!-- 일반 댓글 표시 모드 -->
+            <div v-if="editingCommentId !== comment.id" class="comment-container">
               <div class="comment-header">
-                <span class="comment-author">{{ comment.user }}</span>
-                <span class="comment-date">
-                  {{ formatDate(comment.help_comment_date) }}
-                </span>
+                <div class="comment-meta">
+                  <div class="comment-info">
+                    <span class="comment-author">{{ comment.user.nickname }}</span>
+                    <span class="comment-date">{{ formatDate(comment.help_comment_date) }}</span>
+                  </div>
+                  <div class="comment-content">{{ comment.help_comment_content }}</div>
+                </div>
               </div>
-              <p class="comment-content">{{ comment.help_comment_content }}</p>
               <div v-if="comment.is_author" class="comment-actions">
-                <button @click="startEditComment(comment)" class="btn edit-btn-sm">수정</button>
-                <button @click="deleteComment(comment.id)" class="btn delete-btn-sm">삭제</button>
+                <img 
+                  @click="startEditComment(comment)" 
+                  src="@/assets/images/boards/put.png" 
+                  alt="수정" 
+                  class="action-icon"
+                >
+                <img 
+                  @click="deleteComment(comment.id)" 
+                  src="@/assets/images/boards/delete.png" 
+                  alt="삭제" 
+                  class="action-icon"
+                >
               </div>
             </div>
-            
-            <!-- 댓글 수정 모드일 때 -->
+            <!-- 댓글 수정 모드 -->
             <div v-else class="comment-edit-form">
               <textarea
                 v-model="editedCommentContent"
-                rows="3"
                 class="edit-comment-textarea"
+                rows="3"
               ></textarea>
               <div class="edit-comment-actions">
-                <button @click="saveCommentEdit(comment.id)" class="btn save-btn-sm">저장</button>
-                <button @click="cancelCommentEdit" class="btn cancel-btn-sm">취소</button>
+                <button @click="saveCommentEdit(comment.id)" class="btn save-btn">저장</button>
+                <button @click="cancelCommentEdit" class="btn cancel-btn">취소</button>
               </div>
             </div>
           </div>
@@ -99,11 +130,13 @@
   </div>
 </template>
 
+
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { useAccountStore } from "@/stores/account";
+import Swal from 'sweetalert2';
 
 const route = useRoute();
 const router = useRouter();
@@ -143,6 +176,20 @@ const cancelPostEdit = () => {
 
 // 게시글 수정 저장
 const savePostEdit = async () => {
+  if (!editedTitle.value.trim() || !editedContent.value.trim()) {
+    Swal.fire({
+      title: '입력 확인',
+      text: '제목과 내용을 모두 입력해주세요.',
+      icon: 'error',
+      timer: 1500,
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-warning-button'
+      }
+    });
+    return;
+  }
+
   try {
     const response = await axios.put(
       `http://3.37.135.52/boards/help/${route.params.id}/`,
@@ -156,11 +203,31 @@ const savePostEdit = async () => {
         }
       }
     );
-    help.value = response.data;
+    
+    help.value = { ...response.data, is_author: true };
     editingPost.value = false;
+
+    await Swal.fire({
+      title: '수정 완료!',
+      text: '게시글이 성공적으로 수정되었습니다.',
+      icon: 'success',
+      timer: 1500,
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-success-button'
+      }
+    });
   } catch (error) {
     console.error("게시글 수정 실패:", error);
-    alert(error.response?.data?.error || "게시글 수정에 실패했습니다.");
+    Swal.fire({
+      title: '수정 실패',
+      text: error.response?.data?.error || '게시글 수정에 실패했습니다.',
+      icon: 'error',
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-warning-button'
+      }
+    });
   }
 };
 
@@ -178,16 +245,24 @@ const cancelCommentEdit = () => {
 
 // 댓글 수정 저장
 const saveCommentEdit = async (commentId) => {
+  if (!editedCommentContent.value.trim()) {
+    Swal.fire({
+      title: '댓글 내용을 입력해주세요',
+      icon: 'error',
+      timer: 1500,
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-warning-button'
+      }
+    });
+    return;
+  }
+
   try {
-    // 현재 수정 중인 댓글 찾기
-    const currentComment = comments.value.find(c => c.id === commentId);
-    
     const response = await axios.put(
       `http://3.37.135.52/boards/help/comments/${commentId}/`,
       {
         help_comment_content: editedCommentContent.value,
-        help_article: help.value.id,  // 게시글 ID 추가
-        user: currentComment.user     // 사용자 ID 추가
       },
       {
         headers: {
@@ -196,19 +271,37 @@ const saveCommentEdit = async (commentId) => {
       }
     );
 
-    // 수정된 댓글로 업데이트
     const index = comments.value.findIndex(c => c.id === commentId);
-    // 기존 댓글의 속성을 보존하면서 수정된 내용 반영
-    comments.value[index] = {
-      ...comments.value[index],
-      help_comment_content: editedCommentContent.value
-    };
+    if (index !== -1) {
+      comments.value[index] = {
+        ...comments.value[index],
+        help_comment_content: editedCommentContent.value
+      };
+    }
     
-    // 수정 모드 종료
     cancelCommentEdit();
+    
+    await Swal.fire({
+      title: '댓글 수정 완료!',
+      text: '댓글이 성공적으로 수정되었습니다.',
+      icon: 'success',
+      timer: 1500,
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-success-button'
+      }
+    });
   } catch (error) {
     console.error("댓글 수정 실패:", error);
-    alert(error.response?.data?.error || "댓글 수정에 실패했습니다.");
+    Swal.fire({
+      title: '댓글 수정 실패',
+      text: error.response?.data?.error || '댓글 수정에 실패했습니다.',
+      icon: 'error',
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-warning-button'
+      }
+    });
   }
 };
 
@@ -217,7 +310,7 @@ const formatDate = (date) => {
   if (!date) return "";
   return date.split("T")[0];
 };
-const isAuthor = ref(false);
+const isAuthor = computed(() => help.value?.is_author || false);
 const isCommentAuthor = (comment) => comment.user_id === accountStore.userId;
 
 
@@ -252,23 +345,61 @@ const editPost = () => {
   router.push(`/help/edit/${route.params.id}`);
 };
 
+// SweetAlert 전역 스타일 설정
+const swalCustomClass = {
+  popup: 'custom-popup',
+  confirmButton: 'custom-success-button',
+  cancelButton: 'custom-warning-button',
+};
+
 // 게시글 삭제
 const deletePost = async () => {
-  if (!confirm('정말 삭제하시겠습니까?')) return;
-  
-  try {
-    await axios.delete(
-      `http://3.37.135.52/boards/help/${route.params.id}/`,
-      {
-        headers: {
-          Authorization: `Token ${accountStore.token}`,
-        },
+  const result = await Swal.fire({
+    title: '게시글을 삭제하시겠습니까?',
+    text: "삭제된 게시글은 복구할 수 없습니다.",
+    icon: 'warning',
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-warning-button'
+      },
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: '삭제',
+    cancelButtonText: '취소'
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await axios.delete(
+        `http://3.37.135.52/boards/help/${route.params.id}/`,
+        {
+          headers: {
+            Authorization: `Token ${accountStore.token}`,
+          },
+        }
+      );
+      
+      await Swal.fire({
+        title: '삭제 완료!',
+        text: '게시글이 성공적으로 삭제되었습니다.',
+        icon: 'success',
+        timer: 1500,
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-success-button'
       }
-    );
-    router.push('/help');
-  } catch (error) {
-    console.error("게시글 삭제 실패:", error);
-    alert(error.response?.data?.error || '삭제에 실패했습니다.');
+      });
+      
+      router.push('/help');
+    } catch (error) {
+      console.error("게시글 삭제 실패:", error);
+      Swal.fire({
+        title: '삭제 실패',
+        text: error.response?.data?.error || '게시글 삭제에 실패했습니다.',
+        icon: 'error'
+      });
+    }
   }
 };
 
@@ -291,18 +422,58 @@ const loadComments = async () => {
 
 // 댓글 작성
 const submitComment = async () => {
-  if (!newComment.value.trim()) return;
+  if (!newComment.value.trim()) {
+    Swal.fire({
+      title: '댓글 내용을 입력해주세요',
+      icon: 'error',
+      timer: 1500,
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-warning-button'
+      }
+    });
+    return;
+  }
+
   try {
     const response = await axios.post(
       `http://3.37.135.52/boards/help/${route.params.id}/comments/`,
-      { help_comment_content: newComment.value },
-      { headers: { Authorization: `Token ${useAccountStore().token}` } }
+      { 
+        help_comment_content: newComment.value, 
+        user: accountStore.userId, 
+        help_article: route.params.id 
+      },
+      { 
+        headers: { 
+          Authorization: `Token ${accountStore.token}` 
+        } 
+      }
     );
 
     comments.value.unshift(response.data);
     newComment.value = "";
+    
+    await Swal.fire({
+      title: '댓글 작성 완료!',
+      text: '댓글이 성공적으로 등록되었습니다.',
+      icon: 'success',
+      timer: 1500,
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-success-button'
+      }
+    });
   } catch (error) {
     console.error("댓글 작성 실패:", error.response?.data);
+    Swal.fire({
+      title: '댓글 작성 실패',
+      text: error.response?.data?.error || '댓글 작성에 실패했습니다.',
+      icon: 'error',
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-warning-button'
+      }
+    });
   }
 };
 
@@ -314,21 +485,51 @@ const editComment = async (comment) => {
 
 // 댓글 삭제
 const deleteComment = async (commentId) => {
-  if (!confirm('댓글을 삭제하시겠습니까?')) return;
-  
-  try {
-    await axios.delete(
-      `http://3.37.135.52/boards/help/comments/${commentId}/`,
-      {
-        headers: {
-          Authorization: `Token ${accountStore.token}`,
-        },
-      }
-    );
-    loadComments(); // 댓글 목록 새로고침
-  } catch (error) {
-    console.error("댓글 삭제 실패:", error);
-    alert('댓글 삭제에 실패했습니다.');
+  const result = await Swal.fire({
+    title: '댓글을 삭제하시겠습니까?',
+    text: "삭제된 댓글은 복구할 수 없습니다.",
+    icon: 'warning',
+    showCancelButton: true,
+    customClass: swalCustomClass,
+    confirmButtonText: '삭제',
+    cancelButtonText: '취소'
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await axios.delete(
+        `http://3.37.135.52/boards/help/comments/${commentId}/`,
+        {
+          headers: {
+            Authorization: `Token ${accountStore.token}`,
+          },
+        }
+      );
+      
+      await Swal.fire({
+        title: '삭제 완료!',
+        text: '댓글이 성공적으로 삭제되었습니다.',
+        icon: 'success',
+        timer: 1500,
+        customClass: {
+          popup: 'custom-popup',
+          confirmButton: 'custom-success-button'
+        }
+      });
+      
+      loadComments();
+    } catch (error) {
+      console.error("댓글 삭제 실패:", error);
+      Swal.fire({
+        title: '삭제 실패',
+        text: error.response?.data?.error || '댓글 삭제에 실패했습니다.',
+        icon: 'error',
+        customClass: {
+          popup: 'custom-popup',
+          confirmButton: 'custom-warning-button'
+        }
+      });
+    }
   }
 };
 
@@ -340,16 +541,36 @@ const toggleLike = async () => {
       {},
       {
         headers: {
-          Authorization: `Token ${useAccountStore().token}`,
+          Authorization: `Token ${accountStore.token}`,
         },
       }
     );
 
-    // 서버에서 받은 최신 좋아요 수와 상태로 업데이트
     likeCount.value = response.data.like_count;
     isLiked.value = response.data.is_liked;
+
+    const message = isLiked.value ? '좋아요!' : '좋아요가 취소되었습니다.';
+    await Swal.fire({
+      title: message,
+      icon: 'success',
+      timer: 1000,
+      showConfirmButton: false,
+      customClass: {
+        popup: 'custom-popup'
+      }
+    });
   } catch (error) {
     console.error("좋아요 처리 실패:", error);
+    Swal.fire({
+      title: '처리 실패',
+      text: '좋아요 처리에 실패했습니다.',
+      icon: 'error',
+      timer: 1500,
+      customClass: {
+        popup: 'custom-popup',
+        confirmButton: 'custom-warning-button'
+      }
+    });
   }
 };
 
@@ -361,8 +582,8 @@ window.onbeforeunload = function() {
 <style scoped>
 .help-container {
   max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
 }
 
 .help-header {
@@ -389,7 +610,34 @@ window.onbeforeunload = function() {
 .help-detail p {
   color: #444;
   line-height: 1.6;
+  /* margin-bottom: 2rem; */
+}
+
+.top-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  align-items: end;
+  /* margin-bottom: 2rem; */
+}
+
+/* 제목 및 작성자 정보 */
+.post-header {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 1.5rem;
   margin-bottom: 2rem;
+}
+
+.post-header h1 {
+  font-size: 2rem;
+  color: #40a2e3;
+  margin-bottom: 1rem;
+}
+
+.post-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .btn {
@@ -399,7 +647,7 @@ window.onbeforeunload = function() {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.8rem;
   transition: background-color 0.2s;
 }
 
@@ -408,7 +656,7 @@ window.onbeforeunload = function() {
 }
 
 .back-btn {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   display: inline-block;
 }
 
@@ -421,15 +669,16 @@ window.onbeforeunload = function() {
 }
 
 .content {
-  margin-bottom: 2rem;
-  line-height: 1.6;
+  white-space: pre-line;
+  word-break: break-word;
 }
 
 .like-btn {
-  padding: 0.5rem 1rem;
-  border: 1px solid #40a2e3;
+  padding: 0.3rem 0.6rem;
+  border: 2px solid white;
   border-radius: 20px;
   background: white;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -447,6 +696,9 @@ window.onbeforeunload = function() {
 
 .comment-form {
   margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .comment-form textarea {
@@ -464,29 +716,46 @@ window.onbeforeunload = function() {
 }
 
 .comment {
-  padding: 1rem 0;
+  padding: 1.5rem 0;
   border-bottom: 1px solid #eee;
 }
 
 .comment-header {
-  display: flex;
-  justify-content: space-between;
   margin-bottom: 0.5rem;
 }
 
+.comment-meta {
+  margin-bottom: 1rem;
+}
+
+.comment-info {
+  display: flex;
+  gap: 2rem;
+  color: #666;
+}
+
 .comment-author {
+  color: #aaa9a9;
+  font-size: 1rem;
   font-weight: bold;
-  color: #40a2e3;
 }
 
 .comment-date {
-  color: #666;
-  font-size: 0.9rem;
+  color: #aaa9a9;
+  font-size: 0.7rem;
+  padding-top: 5px;
 }
 
 .comment-content {
-  color: #444;
-  line-height: 1.4;
+  color: #505050;
+  font-size: 1rem;
+  margin-top: 1rem;
+  padding-left: 5px;
+}
+
+.author-info {
+  display: flex;
+  gap: 2rem;
 }
 
 .author-actions {
@@ -495,33 +764,23 @@ window.onbeforeunload = function() {
   gap: 1rem;
 }
 
-.edit-btn, .edit-btn-sm {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+
+.action-icon {
+  width: 20px;
+  height: 20px;
   cursor: pointer;
+  transition: opacity 0.2s;
 }
 
-.delete-btn, .delete-btn-sm {
-  background-color: #f44336;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.edit-btn-sm, .delete-btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.8rem;
+.action-icon:hover {
+  opacity: 0.7;
 }
 
 .comment-actions {
   margin-top: 0.5rem;
   display: flex;
   gap: 0.5rem;
+  justify-content: flex-end;  /* 오른쪽 정렬 */
 }
 
 .login-message {
@@ -531,11 +790,11 @@ window.onbeforeunload = function() {
 }
 
 .btn {
+  padding: 0.5rem 1rem;
   border: none;
   border-radius: 4px;
-  padding: 0.5rem 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
 }
 
 .btn:hover {
@@ -571,7 +830,7 @@ window.onbeforeunload = function() {
 }
 
 .save-btn {
-  background-color: #4CAF50;
+  background-color: #288745;
   color: white;
 }
 
@@ -596,6 +855,29 @@ window.onbeforeunload = function() {
 .edit-comment-actions {
   display: flex;
   gap: 0.5rem;
+}
+
+.author {
+  color: #666;
+  font-weight: bold;
+  margin: 0;
+}
+
+.date {
+  color: #666;
+}
+
+.edit-btn-sm, .delete-btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+.action-icon[src*="put"]:hover {
+  filter: invert(24%) sepia(97%) saturate(431%) hue-rotate(90deg) brightness(92%) contrast(89%);
+}
+
+.action-icon[src*="delete"]:hover {
+  filter: invert(40%) sepia(89%) saturate(2526%) hue-rotate(338deg) brightness(90%) contrast(111%);
 }
 
 </style>

@@ -52,10 +52,12 @@
 import { ref } from "vue";
 import { useFinanceStore } from "@/stores/finance";
 import Swal from 'sweetalert2';
+import { useAccountStore } from "@/stores/account";
 
 const productType = ref("예금"); // 기본값: 적금
 const monthlySaving = ref(125000);
 const savingPeriod = ref(6);
+const accountStore = useAccountStore()
 
 function formatCurrency(value) {
   return value.toLocaleString();
@@ -76,12 +78,15 @@ Swal.fire({
 
 const sendRecommend = function () {
   const financeStore = useFinanceStore()
+  console.log(accountStore.birthDate)
   const data = {
     category: productType.value,
     save_money: monthlySaving.value,
     save_trm: savingPeriod.value,
-    user_birthday: '1999-12-25'
+    user_birthday: accountStore.birthDate
   }
+  console.log(data);
+  
   financeStore.recommendProduct(data)
 }
 </script>

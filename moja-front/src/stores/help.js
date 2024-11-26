@@ -33,7 +33,7 @@ export const useHelpStore = defineStore(
       try {
         const response = await axios.get(`${API_URL}/hot-articles/`, {
           headers: {
-            Authorization: `Token ${useAccountStore().token}`,
+            // Authorization: `Token ${useAccountStore().token}`,
           },
         });
         console.log('Hot articles:', response.data);

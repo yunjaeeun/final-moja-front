@@ -186,13 +186,7 @@ const banks = ref([
     "bank_code": "0010927",
     "bank_url": "http://www.kbstar.com"
   },
-  {
-    "id": 12,
-    "bank_nick": "신한",
-    "bank_name": "신한은행",
-    "bank_code": "0011625",
-    "bank_url": "http://www.shinhan.com"
-  },
+
   {
     "id": 12,
     "bank_nick": "신한",
@@ -229,12 +223,7 @@ const banks = ref([
     "bank_name": "토스뱅크 주식회사",
     "bank_code": "0017801",
     "bank_url": "https://www.tossbank.com/product-service/savings/account"
-  },
-  {
-    "id": 0,
-    "bank_nick": "없음",
-    "bank_name": "없음",
-  },
+  }
 ]);
   
 const usernameError = computed(() => {
@@ -248,13 +237,14 @@ const usernameError = computed(() => {
 const passwordError = computed(() => {
   if (!password1.value) return "비밀번호를 입력해주세요.";
   if (
-    password1.value.length < 8 ||
-    !/(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(password1.value)
+    password1.value.length < 8 || 
+    !/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[^a-zA-Z\d])[a-zA-Z\d\W]{8,}$/.test(password1.value)
   ) {
     return "비밀번호는 영문, 숫자, 특수문자를 포함하여 8자리 이상이어야 합니다.";
   }
   return "";
 });
+
 
 const passwordMatchError = computed(() => {
   if (!password2.value) return "비밀번호 확인을 입력해주세요.";
@@ -305,7 +295,7 @@ const signin = () => {
         icon: 'error', // success, error, warning, info
         confirmButtonText: '확인',
         customClass: {
-          confirmButton: 'custom-error-button', // 버튼에 커스텀 클래스 추가
+          confirmButton: 'custom-warning-button', // 버튼에 커스텀 클래스 추가
         },
       });
     return;
@@ -322,7 +312,9 @@ const signin = () => {
     user_monthly_expenses: monthlyExpenses.value,
     bank: selectedBank.value,
   };
-
+  console.log(password1);
+  console.log(password2);
+  
   axios
     .post("http://3.37.135.52/accounts/dj-rest-auth/registration", signinData)
     .then((res) => {
@@ -345,7 +337,7 @@ const signin = () => {
         icon: 'error', // success, error, warning, info
         confirmButtonText: '확인',
         customClass: {
-          confirmButton: 'custom-error-button', // 버튼에 커스텀 클래스 추가
+          confirmButton: 'custom-warning-button', // 버튼에 커스텀 클래스 추가
         },
       });
     });
